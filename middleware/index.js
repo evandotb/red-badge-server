@@ -1,4 +1,4 @@
-const validateSession = require('./validate-jwt')
+// const validateSession = require('./validate-jwt')
 
 module.exports = {
     headers: require('./headers'),

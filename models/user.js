@@ -19,7 +19,7 @@ const db = require('../db');
     },
     role: {
         type: DataTypes.ENUM,
-        values: ['admin', 'user'],
+        values: ['user', 'admin'],
         defaultValue: 'user',
         allowNull: false
     },

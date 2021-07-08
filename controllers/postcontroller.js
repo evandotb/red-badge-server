@@ -1,21 +1,18 @@
 const router = require('express').Router();
-// const router = Express.Router();
-const {Post} = require('../models/post');
-// const {UniqueConstraintError} = require("sequelize/lib/errors");
-// const jwt = require("jsonwebtoken");
-// const bcrypt = require("bcryptjs");
+const {Post} = require('../models');
+const {Comment} = require('../models');
 const middleware = require('../middleware');
 
-//create a post
+//create a comment
 router.post("/create", middleware.validateSession, async(req, res) => { const {
     title, body
 } = req.body.post
-const {userId} = req.user.id;
+const {id} = req.user;
 try {
     const postEntry = await Post.create({
         title, 
         body, 
-        userId: userId
+        userId: id
     });
     
     res.status(201).json({
@@ -29,15 +26,15 @@ try {
 }
 });
 
-//update post
+//update comment
 router.put("/edit/:id", middleware.validateSession, async(req, res) => {
     const {
         title, body
     } = req.body
-    
+    const {id} = req.user.id;
     try{
         const postUpdate = await Post.update({title, body},
-            {where: {id: req.params.id}}
+            {where: {id: req.params.id, userId: id}}
             )
             res.status(200).json({
                 message: "Post successfully updated",
@@ -63,7 +60,7 @@ router.get("/", async (req,res) => {
 })
 
 //delete post
-router.delete("/:id", middleware.validateSession, async (req, res) => {
+router.delete("/delete/:id", middleware.validateSession, async (req, res) => {
     try{
       const lostPost = await Post.destroy({
         where: {id: req.params.id}
@@ -83,16 +80,16 @@ router.delete("/:id", middleware.validateSession, async (req, res) => {
   //admin delete post
   router.delete("/adminDelete/:id", middleware.validateAdmin, async (req, res) => {
     try{
-      const lostPost = await Post.destroy({
+      const adminDelete = await Post.destroy({
         where: {id: req.params.id}
       })
         res.status(200).json({
-          message: "Post successfully deleted",
-          deletePost: lostPost
+          message: "Post successfully deleted by admin",
+          deletePost: adminDelete
         })
     } catch(err){
       res.status(500).json({
-        message: `Failed to delete post: ${err}`
+        message: `Admin Failed to delete post: ${err}`
       })
     }
   })

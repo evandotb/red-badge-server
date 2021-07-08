@@ -4,8 +4,8 @@ const Sequelize = require('sequelize');
 // const Comment = require('./models/comment');
 require('dotenv').config()
 
-const sequelize = new Sequelize('anon-server', 'postgres', '58213', {
-	host: 'localhost',
+const sequelize = new Sequelize(process.env.DB_CONNECTION_STRING, {
+	// host: 'localhost',
 	dialect: 'postgres'
 });
 

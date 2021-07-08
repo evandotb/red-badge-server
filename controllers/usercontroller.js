@@ -1,6 +1,5 @@
 const router = require('express').Router();
-// const router = Express.Router();
-const {User} = require('../models/user');
+const {User} = require('../models');
 const {UniqueConstraintError} = require("sequelize/lib/errors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -10,19 +9,19 @@ const middleware = require('../middleware');
 router.post("/register", async (req, res) => {
     const {username, email, password, role} = req.body.user;
     try{
-        const User = await User.create({
+        const newUser = await User.create({
             username,
             email,
             password: bcrypt.hashSync(password, 15),
             role
         });
 
-        const token = jwt.sign({id: User.id,}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}) //change 168 back to 24 
+        const token = jwt.sign({id: newUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}) //change 168 back to 24 
         
 
         res.status(201).json({
             message: "Successfully registered user",
-            user: User,
+            user: newUser,
             sessionToken: token
         });
     } catch (err){
@@ -32,8 +31,7 @@ router.post("/register", async (req, res) => {
             });
         } else{
             res.status(500).json({
-                message: "Failed to register the user"
-            
+                message: `Failed to register the user ${err}`
             });
         }
     }
@@ -43,7 +41,6 @@ router.post("/register", async (req, res) => {
 //user login
 router.post("/login", async (req, res) => {
     let {email, password} = req.body.user;
-    let {role} = req.user.role;
     try{
         let loginUser = await User.findOne({
             where: {
@@ -55,7 +52,7 @@ router.post("/login", async (req, res) => {
 
             if(comparePasswords){
 
-                let token = jwt.sign({id: loginUser.id, role: admin}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}); //change 168 back to 24
+                let token = jwt.sign({id: loginUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}); //change 168 back to 24
 
             res.status(200).json({
                 user: loginUser,
@@ -74,7 +71,7 @@ router.post("/login", async (req, res) => {
         }
     } catch(err){
         res.status(500).json({
-            message: "Failed to log in"
+            message: `Failed to log in ${err}`
         })
     }
 });
@@ -83,16 +80,16 @@ router.post("/login", async (req, res) => {
 router.get("/:id", middleware.validateSession, async (req, res) =>{
     try {
         const {id} = req.user;
-        const getEmail = await User.findOne({
-            where: {id: id}, include: ['user', 'admin']
+        const getUser = await User.findOne({
+            where: {id: id}
         })
         res.status(200).json({
-            message: 'Email Retrieved',
-            email: getEmail
+            message: 'user Retrieved',
+            user: getUser
         })
     } catch(err) {
         res.status(500).json({
-            message:`Failed to retrieve email: ${err}`
+            message:`Failed to retrieve user: ${err}`
         })
     }
 })
@@ -117,10 +114,10 @@ router.put('/update/:id', middleware.validateSession, async (req, res) => {
 
 //delete user
 router.delete('/delete/:id', middleware.validateSession, async (req, res) => {
-    const {email, password} = req.body.user
+    // const {email, password} = req.body.user
     try {
         const deleteUser = await User.destroy({
-            email}, {where: { id: req.params.id }
+            where: { id: req.params.id }
         })
         res.status(200).json({
             message: "User successfully deleted",
@@ -138,7 +135,7 @@ router.delete('/adminDelete/:id', middleware.validateAdmin, async (req, res) => 
     // const {email, password} = req.body.user
     try {
         const deleteUser = await User.destroy({
-            where: { userId: req.params.id }
+            where: { id: req.params.id }
         })
         res.status(200).json({
             message: "User successfully deleted",
@@ -155,10 +152,10 @@ router.delete('/adminDelete/:id', middleware.validateAdmin, async (req, res) => 
 router.put('/role/:id', middleware.validateAdmin, async (req, res) => {
     // const {email, password} = req.body.user
     try {
-        const update = await User.update({role: 'admin'}, {where: {id: req.params.id}})
+        const updateAdmin = await User.update({role: 'admin'}, {where: {id: req.params.id}})
         res.status(200).json({
             message: 'Admin created',
-            updateAdmin: update
+            updateAdmin: updateAdmin
         })
     } catch (error) {
         res.status(500).json({

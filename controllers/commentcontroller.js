@@ -1,22 +1,19 @@
 const router = require('express').Router();
-// const router = Express.Router();
-const {Comment} = require('../models/comment');
-// const {UniqueConstraintError} = require("sequelize/lib/errors");
-// const jwt = require("jsonwebtoken");
-// const bcrypt = require("bcryptjs");
+const {Comment} = require('../models');
+const {Post} = require('../models')
 const middleware = require('../middleware');
 
 //create comment
 router.post("/create", middleware.validateSession, async(req, res) => { const {
-    comment
+    comment, postId
 } = req.body.comment
 const {id} = req.user;
-const {post_id} = req.post;
+// const {postId} = postId;
 try {
     const commentEntry = await Comment.create({
         comment, 
-        user_id: id,
-        post_id: post_id
+        userId: id,
+        postId
     });
     
     res.status(201).json({
@@ -31,7 +28,7 @@ try {
 });
 
 //update comment
-router.put("/:id", middleware.validateSession, async(req, res) => {
+router.put("/edit/:id", middleware.validateSession, async(req, res) => {
     const {
         comment
     } = req.body
@@ -52,7 +49,7 @@ router.put("/:id", middleware.validateSession, async(req, res) => {
 });
 
 //delete comment
-router.delete("/:id", middleware.validateSession, async (req, res) => {
+router.delete("/delete/:id", middleware.validateSession, async (req, res) => {
     try{
       const deleteCom = await Comment.destroy({
         where: {id: req.params.id}
@@ -69,7 +66,7 @@ router.delete("/:id", middleware.validateSession, async (req, res) => {
   });
 
   //get comment
-  router.get("/", middleware.validateSession, async(req, res) => {
+  router.get("/:id", middleware.validateSession, async(req, res) => {
     const {id} = req.user;
     try {
         const findCom = await Comment.findOne({
@@ -87,7 +84,7 @@ router.delete("/:id", middleware.validateSession, async (req, res) => {
 });
 
 //admin delete comment
-router.delete("/admin/:id", middleware.validateAdmin, async (req, res) => {
+router.delete("/adminDelete/:id", middleware.validateAdmin, async (req, res) => {
     try{
       const deleteCom = await Comment.destroy({
         where: {id: req.params.id}

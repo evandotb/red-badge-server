@@ -4,13 +4,10 @@ const app = Express();
 const dbConnection = require('./db');
 const middleware = require('./middleware');
 
+const controllers = require('./controllers');
 
 app.use(Express.json());
-
 app.use(middleware.headers);
-
-const controllers = require('./controllers');
-const sequelize = require('./db');
 
 app.use('/user', controllers.userController);
 app.use('/post', controllers.postController);
@@ -19,7 +16,7 @@ app.use('/comment', controllers.commentController);
 
 dbConnection.authenticate()
     .then(() => dbConnection.sync(
-        {force: true}
+        // {force: true}
     ))
     .then(() => {
         app.listen(process.env.PORT, () => {
