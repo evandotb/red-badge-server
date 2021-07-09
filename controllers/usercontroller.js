@@ -52,7 +52,7 @@ router.post("/login", async (req, res) => {
 
             if(comparePasswords){
 
-                let token = jwt.sign({id: loginUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}); //change 168 back to 24
+                const token = jwt.sign({id: loginUser.id}, process.env.JWT_SECRET, {expiresIn: 60 * 60 * 168}); //change 168 back to 24
 
             res.status(200).json({
                 user: loginUser,

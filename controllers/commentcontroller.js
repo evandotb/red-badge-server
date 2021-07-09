@@ -65,15 +65,10 @@ router.delete("/delete/:id", middleware.validateSession, async (req, res) => {
     }
   });
 
-  //get comment
-  router.get("/:id", middleware.validateSession, async(req, res) => {
-    const {id} = req.user;
+  //get comments
+  router.get("/", middleware.validateSession, async(req, res) => {
     try {
-        const findCom = await Comment.findOne({
-            where: {
-                owner_id: id
-            }
-        });
+        const findCom = await Comment.findAll();
 
         res.status(200).json(findCom);
     } catch(err) {

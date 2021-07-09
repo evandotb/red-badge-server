@@ -26,7 +26,7 @@ try {
 }
 });
 
-//update comment
+//update post
 router.put("/edit/:id", middleware.validateSession, async(req, res) => {
     const {
         title, body
